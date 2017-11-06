@@ -2,10 +2,10 @@
 'use strict';
 
 function draw(msg) {
-  console.log(msg);
+  console.log(msg + 123);
 }
 
-draw('test');
+draw('test1');
 console.log('test2');
 
 }());
