@@ -1,14 +1,21 @@
 let config = require('./config.js')
+let path = require('path')
+let resolve = require('rollup-plugin-node-resolve')
+let babel = require('rollup-plugin-babel')
 
 let inputOptions = {
-  input: './src/js/index.js',
+  input: path.join(__dirname, '../src/js/index.js'),
   plugins: [
-
+    resolve(),
+    babel({
+      exclude: 'node_modules/**'
+    })
   ]
 }
 
 let outputOptions = {
-  output:
+  file: path.join(__dirname, `../${config.buildPath}/${config.bundleName}.js`),
+  format: config.buildType
 }
 
 module.exports = {
