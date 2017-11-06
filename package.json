@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "dev": "node build/serve.js"
+  },
+  "devDependencies": {
+    "express": "^4.16.2",
+    "rollup": "^0.50.0"
+  }
+}
