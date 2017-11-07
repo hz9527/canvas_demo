@@ -25,7 +25,7 @@ function getMapArr (ctx, length) {
     }
   })
   rgbaArr.map((item, ind) => {
-    if (item[0] >= r && item[1] >= g && item[2] >= b && item[3] > 180) {
+    if (item[0] >= r && item[1] >= g && item[2] >= b && item[3] > 193) {
       return 1
     } else {
       return 0
@@ -37,9 +37,9 @@ function getMapArr (ctx, length) {
       mapArr[mapArr.length - 1].push(item)
     }
   })
-  mapArr.forEach(item => {
-    console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
-  })
+  // mapArr.forEach(item => {
+  //   console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
+  // })
   return mapArr
 }
 

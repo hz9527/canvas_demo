@@ -14,7 +14,6 @@ let timer = null
 let count = 0
 
 btn.addEventListener('click', () => {
-  console.log(input.value)
   if (input.value.length === 0) {
     alert('请输入文字')
   } else {
@@ -40,17 +39,24 @@ control.addEventListener('click', e => {
 })
 
 function start () {
+  let cache
   timer = setInterval(() => {
     let arr = []
-    if (count % 50 === 0) {
+    let addBall = true
+    let c = count % 50
+    if (c === 0) {
       let i = count / 50
       if (i >= mapArrList.length) {
         i = i % mapArrList.length
       }
       arr = mapArrList[i]
+      cache = arr
+    } else if (c < 5) {
+      arr = cache
+      addBall = false
     }
     count++
-    draw(ctx, arr)
+    draw(ctx, arr, addBall)
   }, 50)
 }
 

@@ -55,21 +55,29 @@ function checkDraw(x, y) {
 // canvas width 8 * 90 height 8 * 25
 
 var Manager = {
-  list: [],
+  list: {},
   drawList: [],
   emit: function emit(event, data) {
     // draw remove add
     this['_' + event](data);
   },
   _add: function _add(ball) {
-    ball.index = this.list.length;
-    this.list.push(ball);
+    var key = this._getKey();
+    ball.key = key;
+    this.list[key] = ball;
   },
-  _draw: function _draw(i) {
-    this.drawList.push(i);
+  _draw: function _draw(key) {
+    this.drawList.push(key);
   },
-  _remove: function _remove(i) {
-    this.list[i] = null;
+  _remove: function _remove(key) {
+    delete this.list[key];
+  },
+  _getKey: function _getKey() {
+    var key = Math.random();
+    while (key in this.list) {
+      key = Math.random() + '-' + Math.random();
+    }
+    return key;
   },
   drawAll: function drawAll(ctx) {
     var _this = this;
@@ -81,21 +89,21 @@ var Manager = {
       drawBall(ctx, ball.x, ball.y);
     });
     this.drawList = [];
-    this.list.forEach(function (ball) {
-      if (ball) {
-        ball.change();
+    Object.keys(this.list).forEach(function (key) {
+      if (_this.list[key]) {
+        _this.list[key].change();
       }
     });
   }
 };
 
 function Ball(x, y, manager) {
-  this.vx = getV();
+  this.vx = getV(5, 2);
   this.vy = getV();
   this.color = getColor();
   this.x = x;
   this.y = y;
-  this.index = -1;
+  this.key = -1;
   this.manager = manager;
 }
 
@@ -110,7 +118,7 @@ Ball.prototype.change = function () {
   var status = checkDraw(this.x, this.y);
   if (status === -1) {
     // emit remove
-    this.manager.emit('remove', this.index);
+    this.manager.emit('remove', this.key);
   } else {
     if (direction === 1) {
       this.vy += G;
@@ -118,7 +126,7 @@ Ball.prototype.change = function () {
       this.vy = -this.vy * Elas;
     }
     // emit draw
-    this.manager.emit('draw', this.index);
+    this.manager.emit('draw', this.key);
   }
 };
 
@@ -130,6 +138,8 @@ function drawBall(ctx, x, y) {
 }
 
 function drawAllBall(ctx, mapArr) {
+  var addBall = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
   ctx.clearRect(0, 0, CWidth, CHeight);
   if (mapArr) {
     ctx.fillStyle = DefaultColor;
@@ -138,7 +148,7 @@ function drawAllBall(ctx, mapArr) {
         if (item === 1) {
           var x = indX * CellWidth + CellWidth / 2;
           var y = indY * CellWidth + CellWidth / 2;
-          Manager.emit('add', new Ball(x, y, Manager));
+          addBall && Manager.emit('add', new Ball(x, y, Manager));
           drawBall(ctx, x, y);
         }
       });
@@ -178,7 +188,7 @@ function getMapArr(ctx, length) {
     }
   });
   rgbaArr.map(function (item, ind) {
-    if (item[0] >= r && item[1] >= g && item[2] >= b && item[3] > 180) {
+    if (item[0] >= r && item[1] >= g && item[2] >= b && item[3] > 193) {
       return 1;
     } else {
       return 0;
@@ -190,9 +200,9 @@ function getMapArr(ctx, length) {
       mapArr[mapArr.length - 1].push(item);
     }
   });
-  mapArr.forEach(function (item) {
-    console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'));
-  });
+  // mapArr.forEach(item => {
+  //   console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
+  // })
   return mapArr;
 }
 
@@ -207,7 +217,6 @@ var timer = null;
 var count = 0;
 
 btn.addEventListener('click', function () {
-  console.log(input.value);
   if (input.value.length === 0) {
     alert('请输入文字');
   } else {
@@ -233,17 +242,24 @@ control.addEventListener('click', function (e) {
 });
 
 function start() {
+  var cache = void 0;
   timer = setInterval(function () {
     var arr = [];
-    if (count % 50 === 0) {
+    var addBall = true;
+    var c = count % 50;
+    if (c === 0) {
       var i = count / 50;
       if (i >= mapArrList.length) {
         i = i % mapArrList.length;
       }
       arr = mapArrList[i];
+      cache = arr;
+    } else if (c < 5) {
+      arr = cache;
+      addBall = false;
     }
     count++;
-    drawAllBall(ctx, arr);
+    drawAllBall(ctx, arr, addBall);
   }, 50);
 }
 

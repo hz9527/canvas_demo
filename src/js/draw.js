@@ -3,20 +3,28 @@ import {Radius, CellWidth, G, CHeight, CWidth, DefaultColor, Elas} from './const
 // canvas width 8 * 90 height 8 * 25
 
 let Manager = {
-  list: [],
+  list: {},
   drawList: [],
   emit (event, data) { // draw remove add
     this['_' + event](data)
   },
   _add (ball) {
-    ball.index = this.list.length
-    this.list.push(ball)
+    let key = this._getKey()
+    ball.key = key
+    this.list[key] = ball
   },
-  _draw (i) {
-    this.drawList.push(i)
+  _draw (key) {
+    this.drawList.push(key)
   },
-  _remove (i) {
-    this.list[i] = null
+  _remove (key) {
+    delete this.list[key]
+  },
+  _getKey () {
+    let key = Math.random()
+    while (key in this.list) {
+      key = Math.random() + '-' + Math.random()
+    }
+    return key
   },
   drawAll (ctx) {
     this.drawList.forEach(ind => {
@@ -26,21 +34,21 @@ let Manager = {
       drawBall(ctx, ball.x, ball.y)
     })
     this.drawList = []
-    this.list.forEach(ball => {
-      if (ball) {
-        ball.change()
+    Object.keys(this.list).forEach(key => {
+      if (this.list[key]) {
+        this.list[key].change()
       }
     })
   }
 }
 
 function Ball (x, y, manager) {
-  this.vx = getV()
+  this.vx = getV(5, 2)
   this.vy = getV()
   this.color = getColor()
   this.x = x
   this.y = y
-  this.index = -1
+  this.key = -1
   this.manager = manager
 }
 
@@ -55,7 +63,7 @@ Ball.prototype.change = function () {
   let status = checkDraw(this.x, this.y)
   if (status === -1) {
     // emit remove
-    this.manager.emit('remove', this.index)
+    this.manager.emit('remove', this.key)
   } else {
     if (direction === 1) {
       this.vy += G
@@ -63,7 +71,7 @@ Ball.prototype.change = function () {
       this.vy = -this.vy * Elas
     }
     // emit draw
-    this.manager.emit('draw', this.index)
+    this.manager.emit('draw', this.key)
   }
 }
 
@@ -75,7 +83,7 @@ function drawBall (ctx, x, y) {
   ctx.fill()
 }
 
-function drawAllBall (ctx, mapArr) {
+function drawAllBall (ctx, mapArr, addBall = true) {
   ctx.clearRect(0, 0, CWidth, CHeight)
   if (mapArr) {
     ctx.fillStyle = DefaultColor
@@ -84,7 +92,7 @@ function drawAllBall (ctx, mapArr) {
         if (item === 1) {
           let x = indX * CellWidth + CellWidth / 2
           let y = indY * CellWidth + CellWidth / 2
-          Manager.emit('add', new Ball(x, y, Manager))
+          addBall && Manager.emit('add', new Ball(x, y, Manager))
           drawBall(ctx, x, y)
         }
       })
