@@ -2,7 +2,7 @@
 'use strict';
 
 function draw(msg) {
-  console.log(msg + 123);
+  console.log(msg);
 }
 
 draw('test1');

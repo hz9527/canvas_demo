@@ -1,5 +1,5 @@
 function draw (msg) {
-  console.log(msg + 123)
+  console.log(msg)
 }
 
 export default draw

@@ -4,8 +4,18 @@ let config = require('./config.js')
 let path = require('path')
 let {watch} = require('rollup')
 let {inputOptions, outputOptions} = require('./buildConf.js')
+let opn = require('opn')
+let os = require('os')
 
 let app = express()
+let localhost = os.networkInterfaces()
+Object.keys(localhost).forEach(key => {
+  let item
+  typeof localhost !== 'string' && (item = localhost[key].find(item => item.family === 'IPv4' && item.address !== '127.0.0.1' && !item.internal))
+  if (item) {
+    localhost = item.address
+  }
+})
 
 let expressWs = require('express-ws')(app)
 
@@ -19,22 +29,17 @@ function transHtml (htmlPath, entry, socket) {
       fs.readFile(htmlPath, (err, content) => {
         let script = buildFinish ? `<script src="${entry}"></script>` : ''
         socket && (script += `<script>
-          const socket = new WebSocket('ws://localhost:18000/socket');
-
-            // Connection opened
+            var socket = new WebSocket('ws://localhost:18000/socket')
             socket.addEventListener('open', function (event) {
-                socket.send('loading finish');
-            });
-
-            // Listen for messages
+                socket.send('loading finish')
+            })
             socket.addEventListener('message', function (event) {
-                if (event.data === 'reload') {
-                  location.reload()
-                }
-            });
+              if (event.data === 'reload') {
+                location.reload()
+              }
+            })
           </script>`)
         template = content.toString().replace('</body>', script + '</body>')
-        console.log(template)
         resolve(template)
       })
     } else {
@@ -43,31 +48,6 @@ function transHtml (htmlPath, entry, socket) {
   })
 }
 
-let watcher = watch(Object.assign(
-  {},
-  inputOptions,
-  {output: [outputOptions]},
-  {
-    watch: {
-      include: path.resolve(__dirname, '../src/js/**')
-    }
-  }))
-
-watcher.on('event', event => {
-  let msg = buildFinish ? 'rebuild' : 'build'
-  if (event.code === 'START') {
-    console.log(msg + 'start')
-  } else if (event.code === 'END') {
-    console.log(msg + 'end')
-    !buildFinish && (buildFinish = true)
-    // socket
-    if (config.autoReload && connectWs) {
-      connectWs.emit('message', 'reload')
-    }
-  } else if (event.code === 'ERROR') {
-    console.warn(msg + 'error')
-  }
-})
 app.use(express.static('./' + config.buildPath))
 
 app.ws('/socket', (ws, req) => {
@@ -91,6 +71,36 @@ app.get('/', (req, res) => {
     })
 })
 
+let watcher = watch(Object.assign(
+  {},
+  inputOptions,
+  {output: [outputOptions]},
+  {
+    watch: {
+      chokidar: true,
+      include: path.resolve(__dirname, '../src/js/**')
+    }
+  }))
+
+watcher.on('event', event => {
+  let msg = buildFinish ? 'rebuild' : 'build'
+  if (event.code === 'START') {
+    console.log(msg + 'start')
+  } else if (event.code === 'END') {
+    console.log(msg + 'end')
+    if (config.autoOpen && !buildFinish) {
+      opn('http://' + localhost + ':' + config.port)
+    }
+    !buildFinish && (buildFinish = true)
+    // socket
+    if (config.autoReload && connectWs) {
+      connectWs.emit('message', 'reload')
+    }
+  } else if (event.code === 'ERROR') {
+    console.warn(msg + 'error')
+  }
+})
+
 app.listen(config.port, (err) => {
-  console.log('serve run in port' + config.port)
+  console.log('serve run ' + localhost + ':' + config.port)
 })
