@@ -29,12 +29,14 @@ function transHtml (htmlPath, entry, socket) {
       fs.readFile(htmlPath, (err, content) => {
         let script = buildFinish ? `<script src="${entry}"></script>` : ''
         socket && (script += `<script>
-            var socket = new WebSocket('ws://localhost:18000/socket')
+            var socket = new WebSocket('ws://${localhost}:${config.port}/socket')
             socket.addEventListener('open', function (event) {
                 socket.send('loading finish')
+                console.log('connect successful' + Math.random())
             })
             socket.addEventListener('message', function (event) {
               if (event.data === 'reload') {
+                console.log('reload')
                 location.reload()
               }
             })
@@ -53,13 +55,14 @@ app.use(express.static('./' + config.buildPath))
 app.ws('/socket', (ws, req) => {
   ws.on('message', (msg) => {
     !connectWs && (connectWs = ws)
+    console.log('connect successful')
     ws.send(msg)
   })
 })
 
 app.get('/', (req, res) => {
   let htmlPath = path.join(__dirname, '../src/index.html')
-  let entry = '//localhost:' + config.port + '/' + config.bundleName + '.js'
+  let entry = '//' + localhost + ':' + config.port + '/' + config.bundleName + '.js'
   transHtml(htmlPath, entry, config.autoReload)
     .then(tem => {
       res.send(tem)
@@ -78,26 +81,30 @@ let watcher = watch(Object.assign(
   {
     watch: {
       chokidar: true,
-      include: path.resolve(__dirname, '../src/js/**')
+      include: path.resolve(__dirname, '../src/**')
     }
   }))
 
 watcher.on('event', event => {
   let msg = buildFinish ? 'rebuild' : 'build'
   if (event.code === 'START') {
-    console.log(msg + 'start')
+    console.log(msg + ' start')
   } else if (event.code === 'END') {
-    console.log(msg + 'end')
+    console.log(msg + ' end')
     if (config.autoOpen && !buildFinish) {
       opn('http://' + localhost + ':' + config.port)
     }
     !buildFinish && (buildFinish = true)
     // socket
     if (config.autoReload && connectWs) {
+      console.log('reload')
       connectWs.emit('message', 'reload')
+      connectWs = null
     }
   } else if (event.code === 'ERROR') {
-    console.warn(msg + 'error')
+    console.warn(msg + ' error')
+  } else {
+    console.log(event.code)
   }
 })
 
