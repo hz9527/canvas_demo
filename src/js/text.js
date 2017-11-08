@@ -1,7 +1,7 @@
 const FontSize = 18
-const Red = 0
-const Green = 230
-const Blue = 230
+const Red = 255
+const Green = 255
+const Blue = 255
 const Coef = 0.75
 // canvas width 90 height 25
 function drawText (ctx, text) {
@@ -37,9 +37,9 @@ function getMapArr (ctx, length) {
       mapArr[mapArr.length - 1].push(item)
     }
   })
-  mapArr.forEach(item => {
-    console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
-  })
+  // mapArr.forEach(item => {
+  //   console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
+  // })
   return mapArr
 }
 

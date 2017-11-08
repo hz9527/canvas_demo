@@ -156,9 +156,9 @@ function drawAllBall(ctx, mapArr) {
 }
 
 var FontSize = 18;
-var Red = 0;
-var Green = 230;
-var Blue = 230;
+var Red = 255;
+var Green = 255;
+var Blue = 255;
 var Coef = 0.75;
 // canvas width 90 height 25
 function drawText(ctx, text) {
@@ -198,9 +198,9 @@ function getMapArr(ctx, length) {
       mapArr[mapArr.length - 1].push(item);
     }
   });
-  mapArr.forEach(function (item) {
-    console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'));
-  });
+  // mapArr.forEach(item => {
+  //   console.log(item.join('').replace(/0/g, ' ').replace(/1/g, '*'))
+  // })
   return mapArr;
 }
 
