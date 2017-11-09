@@ -206,70 +206,72 @@ function getMapArr(ctx, length) {
   return mapArr;
 }
 
-var ctx = document.getElementById('canvas').getContext('2d');
-var textCtx = document.getElementById('textCanvas').getContext('2d');
-var input = document.getElementById('input');
-var btn = document.getElementById('btn');
-var con = document.getElementById('con');
-var control = document.getElementById('control');
-var mapArrList = [];
-var timer = null;
-var count = 0;
+window.addEventListener('load', function () {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var textCtx = document.getElementById('textCanvas').getContext('2d');
+  var input = document.getElementById('input');
+  var btn = document.getElementById('btn');
+  var con = document.getElementById('con');
+  var control = document.getElementById('control');
+  var mapArrList = [];
+  var timer = null;
+  var count = 0;
 
-btn.addEventListener('click', function () {
-  if (input.value.length === 0) {
-    alert('请输入文字');
-  } else {
-    var text = input.value;
-    mapArrList.push(getMapItem(text));
-    con.innerHTML += text + '<br/>';
-    input.value = '';
-  }
-});
-
-control.addEventListener('click', function (e) {
-  if (e.target.innerHTML === '开始') {
-    if (mapArrList.length === 0) {
+  btn.addEventListener('click', function () {
+    if (input.value.length === 0) {
       alert('请输入文字');
-      return;
+    } else {
+      var text = input.value;
+      mapArrList.push(getMapItem(text));
+      con.innerHTML += text + '<br/>';
+      input.value = '';
     }
-    e.target.innerHTML = '暂停';
-    start();
-  } else {
-    e.target.innerHTML = '开始';
-    stop();
+  });
+
+  control.addEventListener('click', function (e) {
+    if (e.target.innerHTML === '开始') {
+      if (mapArrList.length === 0) {
+        alert('请输入文字');
+        return;
+      }
+      e.target.innerHTML = '暂停';
+      start();
+    } else {
+      e.target.innerHTML = '开始';
+      stop();
+    }
+  });
+
+  function start() {
+    var cache = void 0;
+    timer = setInterval(function () {
+      var arr = [];
+      var addBall = true;
+      var c = count % 50;
+      if (c === 0) {
+        var i = count / 50;
+        if (i >= mapArrList.length) {
+          i = i % mapArrList.length;
+        }
+        arr = mapArrList[i];
+        cache = arr;
+      } else if (c < 5) {
+        arr = cache;
+        addBall = false;
+      }
+      count++;
+      drawAllBall(ctx, arr, addBall);
+    }, 50);
+  }
+
+  function stop() {
+    clearInterval(timer);
+  }
+
+  function getMapItem(text) {
+    drawText(textCtx, text);
+    return getMapArr(textCtx, text.length);
   }
 });
-
-function start() {
-  var cache = void 0;
-  timer = setInterval(function () {
-    var arr = [];
-    var addBall = true;
-    var c = count % 50;
-    if (c === 0) {
-      var i = count / 50;
-      if (i >= mapArrList.length) {
-        i = i % mapArrList.length;
-      }
-      arr = mapArrList[i];
-      cache = arr;
-    } else if (c < 5) {
-      arr = cache;
-      addBall = false;
-    }
-    count++;
-    drawAllBall(ctx, arr, addBall);
-  }, 50);
-}
-
-function stop() {
-  clearInterval(timer);
-}
-
-function getMapItem(text) {
-  drawText(textCtx, text);
-  return getMapArr(textCtx, text.length);
-}
 
 }());

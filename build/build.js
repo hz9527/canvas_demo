@@ -11,7 +11,7 @@ function buildHtml (htmlPath, entry) {
         console.warn('html template fail: ', err)
         reject(err)
       } else {
-        let tem = fd.toString().replace('</body>', `<script src="${entry}"></script>`)
+        let tem = fd.toString().replace('</head>', `<script src="${entry}"></script></head>`)
         resolve(tem)
       }
     })
@@ -21,16 +21,13 @@ function buildHtml (htmlPath, entry) {
 function build () {
   rollup(inputOptions)
     .then(bundle => {
-      console.log(1)
       return bundle.write(outputOptions)
     })
     .then(() => {
-      console.log(2)
       return buildHtml(path.join(__dirname, '../src/index.html'), './' + config.bundleName + '.js')
     })
     .then(tem => {
-      console.log(3)
-      fs.writeFile(path.join(__dirname, '../dest/index.html'), tem, (err) => {
+      fs.writeFile(path.join(__dirname, '../' + config.buildPath + '/index.html'), tem, (err) => {
         if (err) {
           console.log('build fail')
         } else {
