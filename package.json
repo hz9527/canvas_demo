@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "node build/serve.js"
+    "dev": "node build/serve.js",
+    "build": "node build/build.js"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

@@ -52,6 +52,8 @@ function checkDraw(x, y) {
   return 1;
 }
 
+// canvas width 8 * 90 height 8 * 25
+
 var Manager = {
   list: {},
   drawList: [],
