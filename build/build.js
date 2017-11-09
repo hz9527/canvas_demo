@@ -11,7 +11,7 @@ function buildHtml (htmlPath, entry) {
         console.warn('html template fail: ', err)
         reject(err)
       } else {
-        let tem = fd.toString().replace('</head>', `<script src="${entry}"></head>`)
+        let tem = fd.toString().replace('</head>', `<script src="${entry}"></script></head>`)
         resolve(tem)
       }
     })
