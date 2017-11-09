@@ -41,7 +41,7 @@ function transHtml (htmlPath, entry, socket) {
               }
             })
           </script>`)
-        template = content.toString().replace('</body>', script + '</body>')
+        template = content.toString().replace('</head>', script + '</head>')
         resolve(template)
       })
     } else {

@@ -3,6 +3,6 @@ module.exports = {
   autoOpen: true,
   autoReload: true,
   buildType: 'iife',
-  buildPath: 'dest',
+  buildPath: 'dist',
   bundleName: 'main'
 }
